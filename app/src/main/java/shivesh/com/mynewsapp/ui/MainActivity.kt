@@ -106,7 +106,6 @@ class MainActivity : AppCompatActivity() {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun CollectionItemSelected(event: TypeSelectedEvent) {
-
         startActivity<DetailsActivity>("type" to event.type,
                 "name" to event.name)
 

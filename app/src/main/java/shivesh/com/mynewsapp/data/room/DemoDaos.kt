@@ -16,9 +16,6 @@ interface DemoCitiesDaos {
     @Insert
     fun insertAll(collections: CollectionsEntity)
 
-   /* @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertCity(city: RemoteModel)*/
-
     @Query(RoomConfig.SELECT_COLLECTIONS)
     fun getAllCollections(): Flowable<List<CollectionsEntity>>
 }

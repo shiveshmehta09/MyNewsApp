@@ -1,10 +1,8 @@
 package shivesh.com.mynewsapp.domain
 
-import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import org.parceler.Parcel
 import org.parceler.ParcelConstructor
-import shivesh.com.mynewsapp.data.room.RoomConfig
 
 /**
  * @author

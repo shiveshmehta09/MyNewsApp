@@ -6,12 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import org.greenrobot.eventbus.EventBus
 import shivesh.com.mynewsapp.R
 import shivesh.com.mynewsapp.domain.ItemDTO
-import shivesh.com.mynewsapp.utils.events.TypeSelectedEvent
 import shivesh.com.mynewsapp.utils.loadImageUrl
-import java.util.*
 
 
 /**
