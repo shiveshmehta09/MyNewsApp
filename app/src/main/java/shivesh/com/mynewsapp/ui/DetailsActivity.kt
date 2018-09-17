@@ -4,9 +4,12 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_details.*
@@ -30,7 +33,7 @@ class DetailsActivity : AppCompatActivity() {
     private var isConnectedToInternet: Boolean = false
     private var type: String? = null
     private var name: String? = null
-
+    private var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -152,6 +155,30 @@ class DetailsActivity : AppCompatActivity() {
         val mLayoutManager = LinearLayoutManager(applicationContext)
         recyclerViewDetails.setLayoutManager(mLayoutManager)
         recyclerViewDetails.setAdapter(adapter)
+    }
+
+    private fun setupInternetConnectionObserver(): Disposable {
+        return ReactiveNetwork.observeInternetConnectivity()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { isConnected: Boolean? ->
+                            isConnected?.let {
+                                if (!isConnected)
+                                    Toast.makeText(this, getString(R.string.user_has_lost_internet_connection_message), Toast.LENGTH_SHORT).show()
+                                isConnectedToInternet = isConnected
+                            }
+                        },
+                        { t: Throwable? ->
+                            Log.v("ReactiveNetwork", t?.message)
+                        }
+                )
+    }
+
+    override fun onStart() {
+        super.onStart()
+        compositeDisposable.add(setupInternetConnectionObserver())
+
     }
 
 }

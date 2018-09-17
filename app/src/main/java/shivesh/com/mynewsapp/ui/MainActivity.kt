@@ -1,15 +1,15 @@
 package shivesh.com.mynewsapp.ui
 
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.DividerItemDecoration
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -18,12 +18,11 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.startActivity
 import shivesh.com.mynewsapp.R
-import shivesh.com.mynewsapp.domain.CollectionsDetailsDTO
 import shivesh.com.mynewsapp.di.DemoApplication
+import shivesh.com.mynewsapp.domain.CollectionsDetailsDTO
 import shivesh.com.mynewsapp.domain.ItemDTO
 import shivesh.com.mynewsapp.ui.adapter.DemoCollectionAdapter
 import shivesh.com.mynewsapp.utils.events.TypeSelectedEvent
-import java.util.ArrayList
 import javax.inject.Inject
 
 /**
@@ -37,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var viewModelFactory: MainViewModelFactory
     private lateinit var viewModel: MainViewModel
     private var isConnectedToInternet: Boolean = false
-
+    private var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,6 +107,30 @@ class MainActivity : AppCompatActivity() {
     fun CollectionItemSelected(event: TypeSelectedEvent) {
         startActivity<DetailsActivity>("type" to event.type,
                 "name" to event.name)
+
+    }
+
+    private fun setupInternetConnectionObserver(): Disposable {
+        return ReactiveNetwork.observeInternetConnectivity()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { isConnected: Boolean? ->
+                            isConnected?.let {
+                                if (!isConnected)
+                                    Toast.makeText(this, getString(R.string.user_has_lost_internet_connection_message), Toast.LENGTH_SHORT).show()
+                                isConnectedToInternet = isConnected
+                            }
+                        },
+                        { t: Throwable? ->
+                            Log.v("ReactiveNetwork", t?.message)
+                        }
+                )
+    }
+
+    override fun onStart() {
+        super.onStart()
+        compositeDisposable.add(setupInternetConnectionObserver())
 
     }
 
