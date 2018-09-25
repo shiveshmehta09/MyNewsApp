@@ -14,9 +14,6 @@ class MainViewModel @Inject constructor(val demoCollectionRepository: DemoApiRep
 
     fun getCollection() = demoCollectionRepository.getCollections()
 
-    fun getStory() = demoCollectionRepository.getStory()
+    fun getStory(slug:String) = demoCollectionRepository.getStory(slug)
 
-    fun getTechnology() = demoCollectionRepository.getTechnology()
-
-    fun getTrendingNow() = demoCollectionRepository.getTrendingNow()
 }

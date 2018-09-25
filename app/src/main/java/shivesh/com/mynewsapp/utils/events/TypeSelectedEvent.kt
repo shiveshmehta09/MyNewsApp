@@ -1,11 +1,13 @@
 package shivesh.com.mynewsapp.utils.events
 
+import java.text.FieldPosition
+
 /**
  * @author
  * Created by Shivesh K. Mehta on 16/09/18.
  */
 
 data class TypeSelectedEvent(
-        val type: String,
-        val name: String
+        val slug: String,
+        val position: Int
 )

@@ -18,7 +18,7 @@ import shivesh.com.mynewsapp.utils.loadImageUrl
  * Created by Shivesh K. Mehta on 16/09/18.
  */
 
-class DemoCollectionAdapter(val list: List<ItemDTO>) : RecyclerView.Adapter<DemoCollectionAdapter.ViewHolder>() {
+class DemoCollectionAdapter(val list: ArrayList<ItemDTO>) : RecyclerView.Adapter<DemoCollectionAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent?.context)
                 .inflate(R.layout.item_home, parent, false)
@@ -26,11 +26,21 @@ class DemoCollectionAdapter(val list: List<ItemDTO>) : RecyclerView.Adapter<Demo
     }
 
     override fun getItemCount(): Int {
+
         return list.count()
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return super.getItemViewType(position)
     }
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
         val item = list.get(position)
+
+        if (item.name != null) {
+           // EventBus.getDefault().post(TypeSelectedEvent(item.slug!!, position))
+        }
+
         if (item.name != null) {
             holder?.imageCollection?.visibility = View.INVISIBLE
             holder?.textViewCollectionHeading?.visibility = View.VISIBLE
@@ -39,7 +49,6 @@ class DemoCollectionAdapter(val list: List<ItemDTO>) : RecyclerView.Adapter<Demo
             holder?.textViewSummary?.visibility = View.GONE
             holder?.textViewCollection?.visibility = View.GONE
             holder?.textViewCollectionHeading?.text = item.name
-
 
         } else {
             holder?.textViewCollectionHeading?.visibility = View.GONE
@@ -56,18 +65,6 @@ class DemoCollectionAdapter(val list: List<ItemDTO>) : RecyclerView.Adapter<Demo
 
         }
 
-
-        holder!!.itemView.onClick {
-
-            if (item.name == null) {
-                var name = "Collections"
-                EventBus.getDefault().post(TypeSelectedEvent(item.type!!, name))
-            } else {
-                EventBus.getDefault().post(TypeSelectedEvent(item.type!!, item.name!!))
-
-            }
-
-        }
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

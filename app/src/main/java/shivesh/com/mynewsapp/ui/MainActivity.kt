@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -23,6 +24,7 @@ import shivesh.com.mynewsapp.domain.CollectionsDetailsDTO
 import shivesh.com.mynewsapp.domain.ItemDTO
 import shivesh.com.mynewsapp.ui.adapter.DemoCollectionAdapter
 import shivesh.com.mynewsapp.utils.events.TypeSelectedEvent
+import java.lang.Exception
 import javax.inject.Inject
 
 /**
@@ -37,6 +39,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
     private var isConnectedToInternet: Boolean = false
     private var compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private var itemDTO: ArrayList<ItemDTO> = ArrayList()
+    private var itemDTO1: ArrayList<ItemDTO> = ArrayList()
+    private var itemDTO2: ArrayList<ItemDTO> = ArrayList()
+    private var itemDTO3: ArrayList<ItemDTO> = ArrayList()
+    private var itemDTO4: ArrayList<ItemDTO> = ArrayList()
+    private var slug: String? = null
+    private var position: Int? = null
+    var adapter: DemoCollectionAdapter? = null
+    private var slugList = emptyList<String>().toMutableList()
+    private var currentSlugIndex = 0
+    private var currentIndex = 0;
+    private var index = 0;
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +67,8 @@ class MainActivity : AppCompatActivity() {
     private fun processRequestStartUI() {
 
         progressBar.visibility = View.VISIBLE
-        recyclerViewCollections.visibility = View.GONE
+        //recyclerViewCollections.visibility = View.GONE
+        setupRecyclerView(itemDTO1)
 
     }
 
@@ -69,8 +85,21 @@ class MainActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { collectionResponse: CollectionsDetailsDTO? ->
-                            resolveRequestEndUI()
-                            setupRecyclerView(collectionResponse?.items!!)
+
+                            itemDTO1.addAll(ArrayList(collectionResponse?.items!!))
+                            /*for (item in itemDTO1.filter {
+
+                                !TextUtils.isEmpty(it.slug) })*/
+                            slugList.add("top-stories")
+                            slugList.add("trending_now")
+                            slugList.add("technology")
+
+                            progressBar.visibility = View.GONE
+                            adapter?.notifyDataSetChanged()
+                            try {
+                                setupStoryObserver(slugList[currentIndex])
+                            } catch (e: Exception) {
+                            }
                         },
                         { throwable: Throwable? ->
                             resolveRequestEndUI()
@@ -85,11 +114,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun setupRecyclerView(collectionDetails: List<ItemDTO>) {
-        val adapter: DemoCollectionAdapter? = DemoCollectionAdapter(collectionDetails)
+    private fun setupRecyclerView(collectionDetails: ArrayList<ItemDTO>) {
+        adapter = DemoCollectionAdapter(collectionDetails)
         val mLayoutManager = LinearLayoutManager(applicationContext)
-        recyclerViewCollections.setLayoutManager(mLayoutManager)
-        recyclerViewCollections.setAdapter(adapter)
+        recyclerViewCollections.layoutManager = mLayoutManager
+        recyclerViewCollections.adapter = adapter
     }
 
     override fun onResume() {
@@ -105,9 +134,11 @@ class MainActivity : AppCompatActivity() {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun CollectionItemSelected(event: TypeSelectedEvent) {
-        startActivity<DetailsActivity>("type" to event.type,
-                "name" to event.name)
-
+//        startActivity<DetailsActivity>("type" to event.type,
+//                "name" to event.name)
+        slug = event.slug
+        position = event.position
+        setupStoryObserver(slug!!)
     }
 
     private fun setupInternetConnectionObserver(): Disposable {
@@ -124,6 +155,95 @@ class MainActivity : AppCompatActivity() {
                         },
                         { t: Throwable? ->
                             Log.v("ReactiveNetwork", t?.message)
+                        }
+                )
+    }
+
+
+    private fun setupStoryObserver(slug: String): Disposable? {
+        return viewModel.getStory(slug)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { collectionResponse: CollectionsDetailsDTO? ->
+                            val storyItem = ArrayList(collectionResponse?.items!!)
+                            var index = this.index
+                            for (i in storyItem) {
+                                index++
+                                try{
+                                    itemDTO1.add(index, i)
+                                }catch (e: Exception){
+                                    index = itemDTO1.size-1
+                                    for (i in storyItem) {
+                                        index++
+                                        itemDTO1.add(index, i)
+                                    }
+
+                                }
+                            }
+                            this.index = index+itemDTO1.size-1
+                            adapter?.notifyDataSetChanged()
+                            currentIndex++
+                            currentSlugIndex = currentSlugIndex+itemDTO1.size-1
+                            try {
+                                setupStoryObserver(slugList[currentIndex])
+                            } catch (e: Exception) {
+                            }
+                        },
+                        { throwable: Throwable? ->
+                            resolveRequestEndUI()
+                            if (!isConnectedToInternet) {
+                                Toast.makeText(this, "No Internet", Toast.LENGTH_SHORT).show()
+                            } else {
+                                throwable?.printStackTrace()
+                                Toast.makeText(this, "error in fetching", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                )
+    }
+
+
+    private fun setupTrendingNowObserver(slug: String): Disposable? {
+
+        return viewModel.getStory(slug)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { collectionResponse: CollectionsDetailsDTO? ->
+                            resolveRequestEndUI()
+
+                            itemDTO3 = ArrayList(collectionResponse?.items!!)
+                        },
+                        { throwable: Throwable? ->
+                            resolveRequestEndUI()
+                            if (!isConnectedToInternet) {
+                                Toast.makeText(this, "No Internet", Toast.LENGTH_SHORT).show()
+                            } else {
+                                throwable?.printStackTrace()
+                                Toast.makeText(this, "error in fetching", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                )
+    }
+
+    private fun setupTechnologyObserver(slug: String): Disposable? {
+
+        return viewModel.getStory(slug)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { collectionResponse: CollectionsDetailsDTO? ->
+                            itemDTO4 = ArrayList(collectionResponse?.items!!)
+                            setupTrendingNowObserver("trending_now")
+                        },
+                        { throwable: Throwable? ->
+                            resolveRequestEndUI()
+                            if (!isConnectedToInternet) {
+                                Toast.makeText(this, "No Internet", Toast.LENGTH_SHORT).show()
+                            } else {
+                                throwable?.printStackTrace()
+                                Toast.makeText(this, "error in fetching", Toast.LENGTH_SHORT).show()
+                            }
                         }
                 )
     }

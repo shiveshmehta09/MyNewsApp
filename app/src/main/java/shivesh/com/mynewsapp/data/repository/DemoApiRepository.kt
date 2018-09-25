@@ -12,11 +12,6 @@ interface DemoApiRepository {
 
     fun getCollections(): Single<CollectionsDetailsDTO>
 
-    fun getStory(): Single<CollectionsDetailsDTO>
-
-    fun getTechnology(): Single<CollectionsDetailsDTO>
-
-    fun getTrendingNow(): Single<CollectionsDetailsDTO>
-
+    fun getStory(slug:String): Single<CollectionsDetailsDTO>
 
 }

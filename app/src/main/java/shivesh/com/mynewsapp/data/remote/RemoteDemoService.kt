@@ -2,6 +2,7 @@ package shivesh.com.mynewsapp.data.remote
 
 import io.reactivex.Single
 import retrofit2.http.GET
+import retrofit2.http.Path
 import shivesh.com.mynewsapp.data.remote.model.RemoteModel
 
 /**
@@ -14,12 +15,7 @@ interface RemoteDemoService {
     @GET("collection")
     fun requestDemoCollections(): Single<RemoteModel>
 
-    @GET("top-stories")
-    fun requestDemoStory(): Single<RemoteModel>
+    @GET("{slug}")
+    fun requestDemoStory(@Path("slug") slug: String): Single<RemoteModel>
 
-    @GET("trending_now")
-    fun requestDemoTrendingNow(): Single<RemoteModel>
-
-    @GET("technology")
-    fun requestDemoTechnology(): Single<RemoteModel>
 }

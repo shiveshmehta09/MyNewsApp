@@ -6,6 +6,7 @@ import shivesh.com.mynewsapp.data.remote.RemoteCollectionsDataSource
 import shivesh.com.mynewsapp.data.remote.model.RemoteModel
 import shivesh.com.mynewsapp.data.room.RoomDataSource
 import shivesh.com.mynewsapp.utils.TransformersDTO
+import java.security.PrivateKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,31 +18,10 @@ import javax.inject.Singleton
 @Singleton
 class DemoRepositoryImpl @Inject constructor(
         private val remoteCollectionsDataSource: RemoteCollectionsDataSource,
-        private val roomDataSource: RoomDataSource
-) : DemoApiRepository {
+        private val roomDataSource: RoomDataSource) : DemoApiRepository {
 
-    override fun getStory(): Single<CollectionsDetailsDTO> {
-        return remoteCollectionsDataSource.getStory()
-                .map { remoteModel: RemoteModel ->
-                    TransformersDTO.transformToCollectionsDetailsDTO(
-                            remoteModel
-                    )
-                }
-                .retry(1)
-    }
-
-    override fun getTechnology(): Single<CollectionsDetailsDTO> {
-        return remoteCollectionsDataSource.getTechnology()
-                .map { remoteModel: RemoteModel ->
-                    TransformersDTO.transformToCollectionsDetailsDTO(
-                            remoteModel
-                    )
-                }
-                .retry(1)
-    }
-
-    override fun getTrendingNow(): Single<CollectionsDetailsDTO> {
-        return remoteCollectionsDataSource.getTrendingNow()
+    override fun getStory(slug: String): Single<CollectionsDetailsDTO> {
+        return remoteCollectionsDataSource.getStory(slug)
                 .map { remoteModel: RemoteModel ->
                     TransformersDTO.transformToCollectionsDetailsDTO(
                             remoteModel
@@ -56,6 +36,7 @@ class DemoRepositoryImpl @Inject constructor(
                     TransformersDTO.transformToCollectionsDetailsDTO(
                             remoteModel
                     )
+
                 }
                 .retry(1)
     }

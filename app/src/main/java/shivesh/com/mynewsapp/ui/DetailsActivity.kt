@@ -32,6 +32,7 @@ class DetailsActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
     private var isConnectedToInternet: Boolean = false
     private var type: String? = null
+    private var slug: String? = null
     private var name: String? = null
     private var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
@@ -52,14 +53,17 @@ class DetailsActivity : AppCompatActivity() {
         }
 
         if (type.equals("story") or name.equals("Top Stories") or name.equals("story")) {
+            slug= "top-stories"
             processRequestStartUI()
-            setupStoryObserver()
+            setupStoryObserver(slug!!)
         } else if (name.equals("Trending Now")) {
+            slug = "trending_now"
             processRequestStartUI()
-            setupTrendingNowObserver()
+            setupStoryObserver(slug!!)
         } else if (name.equals("Technology")) {
+            slug = "technology"
             processRequestStartUI()
-            setupTechnologyObserver()
+            setupStoryObserver(slug!!)
         }
 
 
@@ -68,19 +72,19 @@ class DetailsActivity : AppCompatActivity() {
 
     private fun processRequestStartUI() {
 
-        progressBar.visibility = View.VISIBLE
+        progressBar1.visibility = View.VISIBLE
         recyclerViewDetails.visibility = View.GONE
     }
 
     private fun resolveRequestEndUI() {
-        progressBar.visibility = View.GONE
+        progressBar1.visibility = View.GONE
         recyclerViewDetails.visibility = View.VISIBLE
 
     }
 
 
-    private fun setupStoryObserver(): Disposable? {
-        return viewModel.getStory()
+    private fun setupStoryObserver(slug:String): Disposable? {
+        return viewModel.getStory(slug)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -103,8 +107,8 @@ class DetailsActivity : AppCompatActivity() {
     }
 
 
-    private fun setupTechnologyObserver(): Disposable? {
-        return viewModel.getTechnology()
+   /* private fun setupTechnologyObserver(): Disposable? {
+        return viewModel.getStory("")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -128,7 +132,7 @@ class DetailsActivity : AppCompatActivity() {
 
 
     private fun setupTrendingNowObserver(): Disposable? {
-        return viewModel.getTrendingNow()
+        return viewModel.getStory("")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -148,7 +152,7 @@ class DetailsActivity : AppCompatActivity() {
                             }
                         }
                 )
-    }
+    }*/
 
     private fun setupRecyclerView(collectionDetails: List<ItemDTO>) {
         val adapter: DetailsCollectionAdapter? = DetailsCollectionAdapter(collectionDetails)

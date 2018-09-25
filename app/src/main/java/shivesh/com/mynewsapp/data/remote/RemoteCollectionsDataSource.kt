@@ -14,12 +14,6 @@ class RemoteCollectionsDataSource @Inject constructor(private val remoteDemoServ
     fun requestCollections(): Single<RemoteModel> =
             remoteDemoService.requestDemoCollections()
 
-    fun getStory(): Single<RemoteModel> =
-            remoteDemoService.requestDemoStory()
-
-    fun getTechnology(): Single<RemoteModel> =
-            remoteDemoService.requestDemoTechnology()
-
-    fun getTrendingNow(): Single<RemoteModel> =
-            remoteDemoService.requestDemoTrendingNow()
+    fun getStory(slug: String): Single<RemoteModel> =
+            remoteDemoService.requestDemoStory(slug)
 }
